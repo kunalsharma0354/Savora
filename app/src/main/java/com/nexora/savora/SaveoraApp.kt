@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.nexora.savora.ui.components.GlowBackground
+import com.nexora.savora.ui.screens.AboutScreen
 import com.nexora.savora.ui.screens.HomeScreen
 import com.nexora.savora.ui.screens.PermissionScreen
 import com.nexora.savora.ui.theme.MonoSnackBar
@@ -87,6 +88,7 @@ fun SaveoraApp() {
 private fun MainContent() {
     val snackbarHostState = remember { SnackbarHostState() }
     val scheme = MaterialTheme.colorScheme
+    var showAbout by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         containerColor = scheme.background,
@@ -121,7 +123,14 @@ private fun MainContent() {
                 .padding(innerPadding)
         ) {
             GlowBackground(Modifier.fillMaxSize())
-            HomeScreen(snackbarHostState)
+            if (showAbout) {
+                AboutScreen(onBack = { showAbout = false })
+            } else {
+                HomeScreen(
+                    snackbarHostState = snackbarHostState,
+                    onOpenAbout = { showAbout = true }
+                )
+            }
         }
     }
 }

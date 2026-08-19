@@ -77,7 +77,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,7 +110,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun HomeScreen(snackbarHostState: SnackbarHostState, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    snackbarHostState: SnackbarHostState,
+    onOpenAbout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -331,13 +334,97 @@ fun HomeScreen(snackbarHostState: SnackbarHostState, modifier: Modifier = Modifi
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = true,
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = MonoNavBar,
                 drawerContentColor = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.width(320.dp)
+                modifier = Modifier.width(272.dp)
             ) {
-                AboutDrawer(onClose = { scope.launch { drawerState.close() } })
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(12.dp, RoundedCornerShape(11.dp), spotColor = Color.White.copy(alpha = 0.25f))
+                                .clip(RoundedCornerShape(11.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), RoundedCornerShape(11.dp))
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.saveora_logo),
+                                contentDescription = "Savora Logo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = "Savora",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                brush = Brush.linearGradient(listOf(Color.White, Color(0xFF9A9A9A)))
+                            ),
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.10f))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    scope.launch { drawerState.close() }
+                                    onOpenAbout()
+                                }
+                            )
+                            .padding(horizontal = 14.dp, vertical = 13.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = AppIcons.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.width(11.dp))
+                            Text(
+                                text = "About",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.weight(1f))
+
+                    Text(
+                        text = "Version ${BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
             }
         }
     ) {
@@ -512,170 +599,6 @@ Row(
         }
         }
     }
-    }
-}
-
-@Composable
-private fun AboutDrawer(onClose: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MonoNavBar)
-            .padding(horizontal = 22.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "About",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    brush = Brush.linearGradient(listOf(Color.White, Color(0xFF9A9A9A)))
-                ),
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            )
-            Spacer(Modifier.weight(1f))
-            GlassIconButton(
-                icon = AppIcons.Close,
-                contentDescription = "Close",
-                onClick = onClose
-            )
-        }
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = Color.White.copy(alpha = 0.30f))
-                    .clip(RoundedCornerShape(24.dp))
-                    .border(1.dp, scheme.outline.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.saveora_logo),
-                    contentDescription = "Savora Logo",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Text(
-                text = "Savora",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    brush = Brush.linearGradient(listOf(Color.White, Color(0xFF9A9A9A)))
-                ),
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-            Text(
-                text = "Version ${BuildConfig.VERSION_NAME}",
-                style = MaterialTheme.typography.labelMedium,
-                color = scheme.onSurface.copy(alpha = 0.5f),
-                letterSpacing = 0.8.sp
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Color.White.copy(alpha = 0.10f))
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SectionLabel("Purpose", icon = AppIcons.Settings)
-            Text(
-                text = "This app is built purely for problem-solving and learning purposes. " +
-                    "It is not intended for commercial distribution.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = scheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SectionLabel("Details", icon = AppIcons.YouTube)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(scheme.surface.copy(alpha = 0.10f))
-                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = AppIcons.YouTube,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp),
-                    tint = scheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "YouTube & Instagram downloads",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = scheme.onSurface.copy(alpha = 0.8f)
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(scheme.surface.copy(alpha = 0.10f))
-                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = AppIcons.Videocam,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp),
-                    tint = scheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "Up to 4K quality, audio & video modes",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = scheme.onSurface.copy(alpha = 0.8f)
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(scheme.surface.copy(alpha = 0.10f))
-                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = AppIcons.Android,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp),
-                    tint = scheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "Android 10 and above",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = scheme.onSurface.copy(alpha = 0.8f)
-                )
-            }
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            text = "Made with Kotlin & Jetpack Compose",
-            style = MaterialTheme.typography.labelSmall,
-            color = scheme.onSurface.copy(alpha = 0.4f),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
     }
 }
 
