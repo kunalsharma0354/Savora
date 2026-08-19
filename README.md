@@ -2,6 +2,8 @@
 
 Savora is an Android application for downloading media from YouTube (videos, Shorts) and Instagram (Reels) directly to your device. It requires no manual input beyond pasting a link: the app detects the platform, resolves the available formats automatically, and saves the media to the Downloads folder.
 
+This app is built purely for problem-solving and learning purposes and is not intended for commercial distribution.
+
 The app follows a strict black-and-white design language inspired by the NEXORA brand system: glassmorphism cards, pill-shaped controls, gradient typography, and white glow accents.
 
 ## Features

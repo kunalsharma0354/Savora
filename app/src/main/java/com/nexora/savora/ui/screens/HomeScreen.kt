@@ -42,12 +42,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,9 +77,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexora.savora.BuildConfig
 import com.nexora.savora.R
 import com.nexora.savora.data.DownloadEngine
 import com.nexora.savora.data.FetchResult
@@ -98,6 +104,7 @@ import com.nexora.savora.ui.components.QualityChip
 import com.nexora.savora.ui.components.SectionLabel
 import com.nexora.savora.ui.components.TagPill
 import com.nexora.savora.ui.icons.AppIcons
+import com.nexora.savora.ui.theme.MonoNavBar
 import com.nexora.savora.ui.theme.MonoPanel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -320,6 +327,20 @@ fun HomeScreen(snackbarHostState: SnackbarHostState, modifier: Modifier = Modifi
         }
     }
 
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = MonoNavBar,
+                drawerContentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.width(320.dp)
+            ) {
+                AboutDrawer(onClose = { scope.launch { drawerState.close() } })
+            }
+        }
+    ) {
     Box(modifier.fillMaxSize()) {
         // subtle top fade — modern depth
         Box(
@@ -346,7 +367,18 @@ fun HomeScreen(snackbarHostState: SnackbarHostState, modifier: Modifier = Modifi
                 .padding(top = 10.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-HomeHeader()
+Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HomeHeader()
+            Spacer(Modifier.weight(1f))
+            GlassIconButton(
+                icon = AppIcons.Settings,
+                contentDescription = "About",
+                onClick = { scope.launch { drawerState.open() } }
+            )
+        }
 
         GlassCard {
             SectionLabel("Paste link", icon = AppIcons.Link)
@@ -479,6 +511,171 @@ HomeHeader()
             )
         }
         }
+    }
+    }
+}
+
+@Composable
+private fun AboutDrawer(onClose: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MonoNavBar)
+            .padding(horizontal = 22.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "About",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    brush = Brush.linearGradient(listOf(Color.White, Color(0xFF9A9A9A)))
+                ),
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.weight(1f))
+            GlassIconButton(
+                icon = AppIcons.Close,
+                contentDescription = "Close",
+                onClick = onClose
+            )
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = Color.White.copy(alpha = 0.30f))
+                    .clip(RoundedCornerShape(24.dp))
+                    .border(1.dp, scheme.outline.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.saveora_logo),
+                    contentDescription = "Savora Logo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Text(
+                text = "Savora",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    brush = Brush.linearGradient(listOf(Color.White, Color(0xFF9A9A9A)))
+                ),
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+            Text(
+                text = "Version ${BuildConfig.VERSION_NAME}",
+                style = MaterialTheme.typography.labelMedium,
+                color = scheme.onSurface.copy(alpha = 0.5f),
+                letterSpacing = 0.8.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color.White.copy(alpha = 0.10f))
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionLabel("Purpose", icon = AppIcons.Settings)
+            Text(
+                text = "This app is built purely for problem-solving and learning purposes. " +
+                    "It is not intended for commercial distribution.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionLabel("Details", icon = AppIcons.YouTube)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(scheme.surface.copy(alpha = 0.10f))
+                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = AppIcons.YouTube,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = scheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = "YouTube & Instagram downloads",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(scheme.surface.copy(alpha = 0.10f))
+                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = AppIcons.Videocam,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = scheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = "Up to 4K quality, audio & video modes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(scheme.surface.copy(alpha = 0.10f))
+                    .border(1.dp, scheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = AppIcons.Android,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = scheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = "Android 10 and above",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Text(
+            text = "Made with Kotlin & Jetpack Compose",
+            style = MaterialTheme.typography.labelSmall,
+            color = scheme.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
