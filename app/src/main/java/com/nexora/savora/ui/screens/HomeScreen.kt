@@ -375,7 +375,7 @@ HomeHeader()
                     singleLine = true,
                     placeholder = {
                         Text(
-                            "Instagram reel / YouTube video link",
+                            "Enter Link Here",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
